@@ -80,12 +80,13 @@ fi
 # Powershell
 if [ -n "$POWERSHELL" -o -n "$FULL" ]; then
     ${APKINST} powershell &&
-    ln -s /usr/bin/pwsh /usr/local/bin/powershell &&
+    sudo /bin/ln -s /usr/bin/pwsh /usr/local/bin/powershell &&
     ${CSINST} ms-vscode.powershell
 fi
 
-# prepare $HOME
-if [ -n "$FIRSTINIT" ]; then
+if [ $UID -eq 0 ]; then
+  # prepare $HOME
+  if [ -n "$FIRSTINIT" ]; then
     if [ ! -s $HOME/.bashrc ]; then
         echo "alias dir='ls -lF'" > $HOME/.bashrc
     fi
@@ -93,10 +94,12 @@ if [ -n "$FIRSTINIT" ]; then
         mkdir $HOME/workspace
     fi
     chown -R coder:coder $HOME
-    unset SUDO_PASSWORD
-fi
+    if [ -n "$SUDO_PASSWORD" ]; then
+      echo "coder:$SUDO_PASSWORD" | chpasswd
+      unset SUDO_PASSWORD
+    fi
+  fi
 
-# start codeserver
-if [ $UID -eq 0 ]; then
-    /sbin/su-exec coder /usr/local/bin/code-server --bind-addr 0.0.0.0:8080
+  # start codeserver
+  /sbin/su-exec coder /usr/local/bin/code-server --bind-addr 0.0.0.0:8080
 fi
