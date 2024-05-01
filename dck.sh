@@ -2,27 +2,26 @@
 # v1.0
 
 COMMAND="build"
-DIR=`pwd`
-VERSION=`basename "$DIR"`
-DIR=`dirname "$DIR"`
-IMAGE=`basename "$DIR"`
-TAG="${IMAGE}:${VERSION}"
+VERSION="latest"
+IMAGE=""
+TAG=""
 DETACH="-it --rm"
 NAME="-temp"
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --help|-h)
-      echo "usage: $0"
-      echo "	--command|-c  COMMAND [${COMMAND}]"
-      echo "	--run|-r      COMMAND=run"
-      echo "	--version     VERSION [${VERSION}]"
-      echo "	--image|-i    IMAGE [${IMAGE}]"
-      echo "	--tag|-t      TAG [${TAG}]"
-      echo "	--volume|-v   VOLUME [${VOLUME}]"
-      echo "	--port|-p     PORT [${PORT}]"
-      echo "	-d            DETACH [${DETACH}]"
-      echo "	extra         TAG-EXTRA"
+      echo "usage: $0 [OPTIONS] DOCKERFILE_DIR"
+      echo "  --command|-c  COMMAND [${COMMAND}]"
+      echo "  --run|-r      COMMAND=run"
+      echo "  --version     VERSION [${VERSION}]"
+      echo "  --image|-i    IMAGE [${IMAGE}]"
+      echo "  --tag|-t      TAG [${TAG}]"
+      echo "  --volume|-v   VOLUME [${VOLUME}]"
+      echo "  --port|-p     PORT [${PORT}]"
+      echo "  -d            DETACH [${DETACH}]"
+      echo "  extra         TAG-EXTRA"
+      echo "DOCKERFILE_DIR: Path to the directory containing the Dockerfile"
       exit
       ;;
     --run|-r)
@@ -35,12 +34,10 @@ while [ $# -gt 0 ]; do
     --version)
       shift
       VERSION=$1
-      TAG="${IMAGE}:${VERSION}"
       ;;
     --image|-i)
       shift
       IMAGE=$1
-      TAG="${IMAGE}:${VERSION}"
       ;;
     --tag|-t)
       shift
@@ -59,16 +56,26 @@ while [ $# -gt 0 ]; do
       NAME=""
       ;;
     *)
-      TAG=${TAG}-$1
+      DOCKERFILE_DIR=$1
       ;;
   esac
   shift
 done
 
+if [ -z "$DOCKERFILE_DIR" ]; then
+  echo "Error: Dockerfile directory path is required!"
+  exit 1
+fi
+
+# Extracting image name and version from the Dockerfile directory path
+IMAGE=$(basename $(dirname "$DOCKERFILE_DIR"))
+VERSION=$(basename "$DOCKERFILE_DIR")
+TAG="${IMAGE}:${VERSION}"
+
 if [ "${COMMAND}" = "build" ]; then
-	echo docker build -t ${TAG} .
-	docker build -t ${TAG} .
+  echo "Building Docker image ${TAG} using Dockerfile in ${DOCKERFILE_DIR}"
+  docker build -t ${TAG} ${DOCKERFILE_DIR}
 elif [ "${COMMAND}" = "run" ]; then
-	echo docker run ${DETACH} --name ${IMAGE}${NAME} ${PORT} ${VOLUME} ${TAG}
-	docker run ${DETACH} --name ${IMAGE}${NAME} ${PORT} ${VOLUME} ${TAG}
+  echo "Running Docker container from image ${TAG}"
+  docker run ${DETACH} --name ${IMAGE}${NAME} ${PORT} ${VOLUME} ${TAG}
 fi
