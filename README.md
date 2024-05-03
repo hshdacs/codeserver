@@ -23,9 +23,9 @@ This repository contains a Dockerfile and setup script to create a Docker image 
 
 1. Make sure you have docker installed on your machine by running `docker -v` in the terminal. If not, please install it.
 2. Select a version from above, you can see the dck.sh file on the codeserver folder.
-3. run this command in your terminal './dck.sh /PathToThe/Version/folder'. For example if you have chosen 4.22.1
-   command should be './dck.sh /PathToThe/Version/4.22.1'.
-- It builds a docker image  using that specific version.
+3. Change directory to the newest version of codeserver, e.g. 4.22.1
+4. run this command in your terminal '../dck.sh'
+5. It builds a docker image using that specific version.
 
     # what dck.sh file does?
     - this shell script designed to automate some common docker tasks, such as building docker images and running docker containers.
