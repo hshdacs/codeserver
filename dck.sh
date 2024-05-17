@@ -1,5 +1,5 @@
 #!/bin/sh
-# v1.0
+# v1.1
 
 COMMAND="build"
 DIR=`pwd`
@@ -21,6 +21,7 @@ while [ $# -gt 0 ]; do
       echo "	--tag|-t      TAG [${TAG}]"
       echo "	--volume|-v   VOLUME [${VOLUME}]"
       echo "	--port|-p     PORT [${PORT}]"
+      echo "    --arg|-a      BUILD-ARG"
       echo "	-d            DETACH [${DETACH}]"
       echo "	extra         TAG-EXTRA"
       exit
@@ -54,6 +55,10 @@ while [ $# -gt 0 ]; do
       shift
       PORT="$PORT -p $1"
       ;;
+    --arg|-a)
+      shift
+      ARGS="$ARGS --build-arg $1"
+      ;;
     -d)
       DETACH="-d"
       NAME=""
@@ -66,8 +71,8 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "${COMMAND}" = "build" ]; then
-	echo docker build -t ${TAG} .
-	docker build -t ${TAG} .
+	echo docker build -t ${TAG} ${ARGS} .
+	docker build -t ${TAG} ${ARGS} .
 elif [ "${COMMAND}" = "run" ]; then
 	echo docker run ${DETACH} --name ${IMAGE}${NAME} ${PORT} ${VOLUME} ${TAG}
 	docker run ${DETACH} --name ${IMAGE}${NAME} ${PORT} ${VOLUME} ${TAG}
